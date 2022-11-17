@@ -17,7 +17,7 @@ public class EjercicioException extends Exception {
      */
     public static final String ILLEGAL_ARGS = "El número de argumentos no es el adecuado.";
     public static final String ILLEGAL_VALUE = "El argumento recibido tiene que ser un número.";
-    public static final String INVALID_VALUE = "Las opciones son:\n 1 - Introducir datos a MySQL.\n2 - Introducir datos a SQLite.";
+    public static final String INVALID_VALUE = "Las opciones son:\n1 - Introducir datos a MySQL.\n2 - Introducir datos a SQLite.";
 
     /**
      * Constructor.

@@ -6,7 +6,7 @@ import java.sql.*;
  *
  * @author AARONFM
  */
-public class Database {
+public final class Database {
 
     /**
      * Constantes bases de datos.

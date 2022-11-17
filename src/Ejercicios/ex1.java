@@ -9,7 +9,6 @@ import Models.Product;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Unha vez creadas as táboas nas bases de datos fai un programa Java que encha
@@ -41,10 +40,18 @@ public class ex1 {
         int argument = validateArgument(args);
         switch (argument) {
             case 1 -> {
-                insertIntoMySQL();
+                try {
+                    insertIntoMySQL();
+                } catch (SQLException ex) {
+                    throw new EjercicioException("Error durante la inserción MySQL:\n%s: %s".formatted(ex.getErrorCode(), ex.getMessage()));
+                }
             }
             case 2 -> {
-                insertIntoSQLite();
+                try {
+                    insertIntoSQLite();
+                } catch (SQLException ex) {
+                    throw new EjercicioException("Error durante la inserción SQLite:\n%s: %s".formatted(ex.getErrorCode(), ex.getMessage()));
+                }
             }
             default ->
                 throw new EjercicioException(EjercicioException.INVALID_VALUE);
@@ -74,57 +81,56 @@ public class ex1 {
 
     /**
      * Inserta la lista de datos en la BD MySQL.
+     *
+     * @throws SQLException Si el intento de conexión falla.
      */
-    private static void insertIntoMySQL() {
-        try {
-            Connection instance = Database.getMySqlInstance();
-            //Autocommit a false.
+    private static void insertIntoMySQL() throws SQLException {
+        try ( Connection instance = Database.getMySqlInstance()) {
             instance.setAutoCommit(false);
-            PreparedStatement prepareInsertion = instance.prepareStatement(DatabaseQueries.INSERT_CLIENT);
-            //Primer lote: Clientes.
-            prepareClientBatch(PresetData.generateClients(), prepareInsertion);
-            int[] clientBatchResults = prepareInsertion.executeBatch();
-            //Segundo lote: Productos.
-            prepareInsertion = instance.prepareStatement(DatabaseQueries.INSERT_PRODUCT);
-            prepareProductBatch(PresetData.generateProducts(), prepareInsertion);
-            int[] productBatchResults = prepareInsertion.executeBatch();
-
-            prepareInsertion.close();
-
-            //Autocommit a true.
+            dataInsertion(instance);
             instance.setAutoCommit(true);
-            //Cerramos conexión.
-        } catch (SQLException ex) {
-            //TODO: HANDLE EXCEPTIONS
-        }
-    }
-
-    public static void prepareClientBatch(List<Client> clients, PreparedStatement prepareInsertion) throws SQLException {
-        for (Client client : clients) {
-            prepareInsertion.setInt(1, client.id());
-            prepareInsertion.setString(2, client.nif());
-            prepareInsertion.setString(3, client.name());
-            prepareInsertion.setString(4, client.address());
-            prepareInsertion.setString(5, client.town());
-            prepareInsertion.setString(6, client.phoneNumber());
-            prepareInsertion.addBatch();
-        }
-    }
-
-    private static void prepareProductBatch(List<Product> products, PreparedStatement prepareInsertion) {
-        for (Product product : products) {
-            
         }
     }
 
     /**
      * Inserta la lista de datos en la BD SQLite.
      */
-    private static void insertIntoSQLite() {
+    private static void insertIntoSQLite() throws SQLException {
+        try ( Connection instance = Database.getSqliteInstance()) {
+            //Bloqueo de autocommit.
+            instance.setAutoCommit(false);
+            //Gestión de la inserción.
+            //Realiza commit o rollback dentro de este método.
+            dataInsertion(instance);
+            //Habilitado de nuevo.
+            instance.setAutoCommit(true);
+        }
+    }
+
+    /**
+     * Inserción de datos. Método compartido por ambas llamadas.
+     *
+     * @param instance la conexión especificada (MySQL o SQLite).
+     * @throws SQLException Si ocurriese un fallo durante el rollback o el
+     * setAutoCommit.
+     */
+    public static void dataInsertion(final Connection instance) throws SQLException {
         try {
-            Connection instance = Database.getSqliteInstance();
+            //Primer lote: Clientes.
+            PreparedStatement prepareInsertion = instance.prepareStatement(DatabaseQueries.INSERT_CLIENT);
+            Client.prepareClientBatch(PresetData.generateClients(), prepareInsertion);
+            prepareInsertion.executeBatch();
+            prepareInsertion.close();
+
+            //Segundo lote: Productos.
+            prepareInsertion = instance.prepareStatement(DatabaseQueries.INSERT_PRODUCT);
+            Product.prepareProductBatch(PresetData.generateProducts(), prepareInsertion);
+            prepareInsertion.executeBatch();
+            prepareInsertion.close();
+            instance.commit();
         } catch (SQLException ex) {
-            //TODO: HANDLE EXCEPTIONS
+            instance.rollback();
+            ex.printStackTrace();
         }
     }
 
