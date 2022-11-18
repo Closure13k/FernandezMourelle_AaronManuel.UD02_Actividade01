@@ -1,9 +1,12 @@
 package Ejercicios;
 
 import Database.Database;
+import Database.DatabaseQueries;
 import Models.EjercicioException;
 import Models.Sale;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,16 +71,7 @@ public class ex3 {
      * Valida el valor introducido y lo traduce al tipo esperado.
      *
      * Dado que recibirá enteros, el valor se traduce a int.
-     *<pre>
-     *  @@code if (args.length != 2) {
-            throw new EjercicioException("%s\n%s".formatted(
-                    EjercicioException.illegalArguments(2),
-                    "El orden deberá de ser: [BASE DATOS] [ID CLIENTE]"
-            ));
-        }
-     * </pre>
-     * 
-     * 
+     *
      * @param args Los argumentos por consola.
      * @return El valor traducido a entero para su uso.
      * @throws EjercicioException Si el número de argumentos no es correcto o el
@@ -123,8 +117,17 @@ public class ex3 {
         }
     }
 
-    private static void getClientInfo(int id, Connection instance) {
-        
+    private static void getClientInfo(int id, Connection instance) throws SQLException {
+        String clientStmt = DatabaseQueries.GET_CLIENT_BY_ID;
+        String saleStmt = DatabaseQueries.GET_CLIENT_SALES;
+        try(PreparedStatement prepareQuery = instance.prepareStatement(clientStmt)){
+            prepareQuery.setInt(1, id);
+            ResultSet clientResult = prepareQuery.executeQuery();
+            StringBuilder sb = new StringBuilder();
+            if(clientResult.next()){
+                sb.append("Nombre cliente: "+clientResult.getString("nombre"));
+            }
+        }
     }
 
 }
