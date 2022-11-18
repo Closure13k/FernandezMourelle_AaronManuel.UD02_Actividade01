@@ -4,9 +4,15 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 /**
- * Record de ventas
+ * Record de ventas.
  */
-public record Sale(int id, Date date, int clientId, int productId, int quantity) {
+public final record Sale(int id, Date date, int clientId, int productId, int quantity) {
+
+    /**
+     * Excepciones específicas de la construcción del objeto.
+     */
+    private static final String ILLEGAL_VALUE_EXCEPTION = "Error al construir una venta. Todos los parámetros a recibir han de ser numéricos.";
+    private static final String INVALID_QUANTITY_EXCEPTION = "Error al preparar la venta: La cantidad de stock no puede ser menor a 0.";
 
     /**
      * Durante la creación: El id no se usará, por lo tanto será 0.
@@ -17,15 +23,16 @@ public record Sale(int id, Date date, int clientId, int productId, int quantity)
      */
     public static Sale createSaleFromArgs(String[] args) throws EjercicioException {
         try {
-            return new Sale(
-                    Integer.parseInt(args[1]),
-                    Date.valueOf(LocalDate.now()),
-                    Integer.parseInt(args[2]),
-                    Integer.parseInt(args[3]),
-                    Integer.parseInt(args[4])
-            );
+            int id = Integer.parseInt(args[1]);
+            int clientId = Integer.parseInt(args[2]);
+            int productId = Integer.parseInt(args[3]);
+            int quantity = Integer.parseInt(args[4]);
+            if (quantity < 0) {
+                throw new EjercicioException(INVALID_QUANTITY_EXCEPTION);
+            }
+            return new Sale(id, Date.valueOf(LocalDate.now()), clientId, productId, quantity);
         } catch (NumberFormatException nfex) {
-            throw new EjercicioException("Error al construir una venta. Los parámetros a recibir han de ser numéricos");
+            throw new EjercicioException(ILLEGAL_VALUE_EXCEPTION);
         }
     }
 }

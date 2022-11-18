@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Record de clientes.
  */
-public record Client(int id, String nif, String name, String address, String town, String phoneNumber) {
+public final record Client(int id, String nif, String name, String address, String town, String phoneNumber) {
 
     /**
      * Recibe un preparedStatement y una lista de clientes.

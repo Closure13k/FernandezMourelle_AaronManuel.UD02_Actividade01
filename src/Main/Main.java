@@ -1,6 +1,5 @@
 package Main;
 
-import Ejercicios.ex1;
 import Ejercicios.ex2;
 import Models.EjercicioException;
 
@@ -14,10 +13,9 @@ public class Main {
             ya que está hecha con batch updates.
              */
 //            ex1.insertData(new String[]{"2"});
-            ex2.insertDataIntoSales(new String[]{"2", "1","1","1","1"});
-            
+            ex2.insertDataIntoSales(new String[]{"2", "7", "1", "20", "-1"});
         } catch (EjercicioException ex) {
-            ex.printStackTrace();
+            System.err.println(ex.getMessage());
         }
     }
 }

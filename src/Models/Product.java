@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Record de productos.
  */
-public record Product(int id, String description, int maxStock, int minStock, int retailPrice) {
+public final record Product(int id, String description, int maxStock, int minStock, int retailPrice) {
 
     /**
      * Recibe un preparedStatement y una lista de productos.

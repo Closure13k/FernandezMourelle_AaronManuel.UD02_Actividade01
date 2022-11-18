@@ -11,8 +11,8 @@ import Models.Sale;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static Database.DatabaseExceptions.identifyErrorCode;
 
 /**
  * Partindo das táboas anteriores, realiza un programa Java para insertar ventas
@@ -47,25 +47,28 @@ import java.util.logging.Logger;
  *
  * @author AaronFM
  */
-public class ex2 {
-
+public final class ex2 {
+    /**
+     * Introduce los datos de una venta en la tabla.
+     * @param args Los datos a recibir: [BASE DATOS] [ID VENTA] [ID CLIENTE] [ID PRODUCTO] [CANTIDAD]
+     * @throws EjercicioException 
+     */
     public static void insertDataIntoSales(String[] args) throws EjercicioException {
         int argument = validateArgument(args);
         Sale sale = Sale.createSaleFromArgs(args);
-        System.out.println(sale);
         switch (argument) {
             case 1 -> {
                 try {
                     insertSaleIntoMySQL(sale);
                 } catch (SQLException ex) {
-                    Logger.getLogger(ex2.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new EjercicioException("%s: %s".formatted(ex.getErrorCode(), ex.getMessage()));
                 }
             }
             case 2 -> {
                 try {
                     insertSaleIntoSQLite(sale);
                 } catch (SQLException ex) {
-                    Logger.getLogger(ex2.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new EjercicioException("%s: %s".formatted(ex.getErrorCode(), ex.getMessage()));
                 }
             }
             default ->
@@ -102,7 +105,8 @@ public class ex2 {
      *
      * @throws SQLException Si el intento de conexión falla.
      */
-    private static void insertSaleIntoMySQL(Sale sale) throws SQLException {
+    private static void insertSaleIntoMySQL(Sale sale) throws SQLException, EjercicioException {
+
         try ( Connection instance = Database.getMySqlInstance()) {
             instance.setAutoCommit(false);
             saleInsertion(sale, instance);
@@ -113,24 +117,24 @@ public class ex2 {
     /**
      * Inserta la lista de datos en la BD SQLite.
      */
-    private static void insertSaleIntoSQLite(Sale sale) throws SQLException {
+    private static void insertSaleIntoSQLite(Sale sale) throws SQLException, EjercicioException {
         try ( Connection instance = Database.getSqliteInstance()) {
             instance.setAutoCommit(false);
-            /**
-             * TODO: Gestionar si existen:
-             *
-             * [ID VENTA] en ventas
-             *
-             * [ID PRODUCTO] en productos
-             *
-             * [ID CLIENTE] en clientes
-             */
             saleInsertion(sale, instance);
             instance.setAutoCommit(true);
         }
     }
 
-    private static void saleInsertion(Sale sale, Connection instance) throws SQLException {
+    /**
+     * Inserción SQL en la tabla.
+     *
+     * @param sale El objeto a insertar.
+     * @param instance La conexión abierta (MySQL o SQLite)
+     * @throws SQLException Si se produce un error durante la inserción.
+     * @throws EjercicioException La excepción reconocida (O un Cod_error :
+     * Mensaje si no la reconocí).
+     */
+    private static void saleInsertion(Sale sale, Connection instance) throws SQLException, EjercicioException {
         try ( PreparedStatement prepareInsertion = instance.prepareStatement(DatabaseQueries.INSERT_SALE)) {
             prepareInsertion.setInt(1, sale.id());
             prepareInsertion.setDate(2, sale.date());
@@ -140,8 +144,9 @@ public class ex2 {
             prepareInsertion.executeUpdate();
         } catch (SQLException sqlex) {
             instance.rollback();
-            sqlex.printStackTrace();
+            throw new EjercicioException(identifyErrorCode(sqlex));
         }
         instance.commit();
     }
+
 }

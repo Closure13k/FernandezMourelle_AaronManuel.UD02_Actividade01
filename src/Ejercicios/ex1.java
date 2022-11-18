@@ -19,7 +19,7 @@ import java.sql.SQLException;
  *
  * @author AARONFM
  */
-public class ex1 {
+public final class ex1 {
 
     /**
      * Inserción de datos en MySQL y SQLite.
