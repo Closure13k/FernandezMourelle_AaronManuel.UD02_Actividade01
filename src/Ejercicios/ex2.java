@@ -48,10 +48,13 @@ import static Database.DatabaseExceptions.identifyErrorCode;
  * @author AaronFM
  */
 public final class ex2 {
+
     /**
      * Introduce los datos de una venta en la tabla.
-     * @param args Los datos a recibir: [BASE DATOS] [ID VENTA] [ID CLIENTE] [ID PRODUCTO] [CANTIDAD]
-     * @throws EjercicioException 
+     *
+     * @param args Los datos a recibir: [BASE DATOS] [ID VENTA] [ID CLIENTE] [ID
+     * PRODUCTO] [CANTIDAD]
+     * @throws EjercicioException
      */
     public static void insertDataIntoSales(String[] args) throws EjercicioException {
         int argument = validateArgument(args);
@@ -142,11 +145,12 @@ public final class ex2 {
             prepareInsertion.setInt(4, sale.productId());
             prepareInsertion.setInt(5, sale.quantity());
             prepareInsertion.executeUpdate();
+            instance.commit();
         } catch (SQLException sqlex) {
             instance.rollback();
             throw new EjercicioException(identifyErrorCode(sqlex));
         }
-        instance.commit();
+
     }
 
 }
