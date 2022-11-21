@@ -8,8 +8,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Preténdese realizar un listado das ventas dun cliente.
@@ -120,12 +118,31 @@ public class ex3 {
     private static void getClientInfo(int id, Connection instance) throws SQLException {
         String clientStmt = DatabaseQueries.GET_CLIENT_BY_ID;
         String saleStmt = DatabaseQueries.GET_CLIENT_SALES;
-        try(PreparedStatement prepareQuery = instance.prepareStatement(clientStmt)){
-            prepareQuery.setInt(1, id);
-            ResultSet clientResult = prepareQuery.executeQuery();
+        try ( PreparedStatement clientQuery = instance.prepareStatement(clientStmt)) {
+            clientQuery.setInt(1, id);
+            ResultSet clientResult = clientQuery.executeQuery();
             StringBuilder sb = new StringBuilder();
-            if(clientResult.next()){
-                sb.append("Nombre cliente: "+clientResult.getString("nombre"));
+            if (clientResult.next()) {
+                sb.append("Nombre cliente: ").append(clientResult.getString("nombre"));
+                try ( PreparedStatement salesQuery = instance.prepareStatement(saleStmt)) {
+                    salesQuery.setInt(1, id);
+                    ResultSet salesResult = salesQuery.executeQuery();
+                    if (salesResult.next()) {
+                        do {
+                            //TODO: Chain query information.
+                        } while (salesResult.next());
+                        /*
+                        Venta: idventa
+                        Data venta: data
+                        Produto: descripción do produto
+                        Cantidade: cantidade
+                        PVP: pvp
+                        Importe: cantidade*pvp
+                        Número total de ventas: ____
+                        Importe total: ___
+                         */
+                    }
+                }
             }
         }
     }
