@@ -25,5 +25,5 @@ public interface DatabaseQueries {
      * Sentencia de consulta SQL para ventas. Recoge la información del
      * ejercicio 3 en base al id del cliente.
      */
-    public static final String GET_CLIENT_SALES = "SELECT IDVENTA, DESCRIPCION, CANTIDAD, PVP FROM VENTAS INNER JOIN PRODUCTOS ON (VENTAS.IDPRODUCTO = PRODUCTOS.ID) WHERE IDCLIENTE = ?";
+    public static final String GET_CLIENT_SALES = "SELECT IDVENTA, DATAVENTA, DESCRIPCION, CANTIDAD, PVP FROM VENTAS INNER JOIN PRODUCTOS ON (VENTAS.IDPRODUCTO = PRODUCTOS.ID) WHERE IDCLIENTE = ?";
 }
