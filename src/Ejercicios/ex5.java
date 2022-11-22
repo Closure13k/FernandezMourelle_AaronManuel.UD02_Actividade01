@@ -21,6 +21,13 @@ import java.util.logging.Logger;
  */
 public class ex5 {
 
+    /**
+     * Recoge la información de un producto en base a su id.
+     *
+     * @param productId
+     * @throws EjercicioException Si falla la validación, la lectura o no se
+     * encuentra.
+     */
     public static void getProductInformation(String productId) throws EjercicioException {
         try {
             int id = Integer.parseInt(productId);
@@ -37,18 +44,26 @@ public class ex5 {
 
     }
 
+    /**
+     * Realiza la consulta a la base de datos.
+     *
+     * @param id
+     * @return Optional Si encuentra o no el producto.
+     * @throws EjercicioException
+     */
     private static Optional<Product> getProduct(int id) throws EjercicioException {
-        try ( Connection instance = Database.Database.getMySqlInstance()) {
-            PreparedStatement prepareQuery = instance.prepareStatement(DatabaseQueries.GET_PRODUCT_BY_ID);
+        try ( Connection instance = Database.Database.getMySqlInstance();  PreparedStatement prepareQuery = instance.prepareStatement(DatabaseQueries.GET_PRODUCT_BY_ID)) {
             prepareQuery.setInt(1, id);
-            ResultSet queryResult = prepareQuery.executeQuery();
-            Product product = null;
-            if (queryResult.next()) {
-                product = Product.generateFromResultSet(queryResult);
+            try ( ResultSet queryResult = prepareQuery.executeQuery()) {
+                Product product = null;
+                if (queryResult.next()) {
+                    product = Product.generateFromResultSet(queryResult);
+                }
+                return Optional.ofNullable(product);
             }
-            return Optional.ofNullable(product);
         } catch (SQLException sqlex) {
             throw new EjercicioException(DatabaseExceptions.identifyErrorCode(sqlex));
         }
+
     }
 }
