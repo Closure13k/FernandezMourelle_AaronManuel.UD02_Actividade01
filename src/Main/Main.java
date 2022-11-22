@@ -1,7 +1,6 @@
 package Main;
 
-import Ejercicios.ex2;
-import Ejercicios.ex3;
+import Ejercicios.*;
 import Models.EjercicioException;
 
 public class Main {
@@ -15,7 +14,7 @@ public class Main {
              */
 //            ex1.insertData(new String[]{"2"});
 //            ex2.insertDataIntoSales(new String[]{"2", "7", "1", "20", "-1"});
-            ex3.getClientInformation(new String[]{"1","1"});
+            ex3.getClientInformation(new String[]{"1", "1"});
         } catch (EjercicioException ex) {
             System.err.println(ex.getMessage());
         }

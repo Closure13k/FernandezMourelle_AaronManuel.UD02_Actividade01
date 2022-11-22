@@ -106,12 +106,12 @@ public class ex3 {
     private static void pickDatabaseAndGetClient(int dataBaseNumber, int clientId) throws EjercicioException, SQLException {
         Connection instance;
         switch (dataBaseNumber) {
-            case 1 -> {
+            case 1 ->
                 instance = Database.getMySqlInstance();
-            }
-            case 2 -> {
+
+            case 2 ->
                 instance = Database.getSqliteInstance();
-            }
+
             default ->
                 throw new EjercicioException(EjercicioException.INVALID_VALUE);
         }

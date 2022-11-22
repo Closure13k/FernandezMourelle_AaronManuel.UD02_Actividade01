@@ -4,15 +4,21 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 /**
- * Record de ventas.
+ * Record de ventas. Guardo constantes por organización y facilidad a la hora de
+ * mantener el código. También se guarda un "factory" que construya ventas a
+ * partir de un array de Strings.
  */
 public final record Sale(int id, Date date, int clientId, int productId, int quantity) {
 
+    //Excepciones específicas de la construcción del objeto.
     /**
-     * Excepciones específicas de la construcción del objeto.
+     * Si los parámetros recibidos por args no son numéricos.
      */
     private static final String ILLEGAL_VALUE_EXCEPTION = "Error al construir una venta. Todos los parámetros a recibir han de ser numéricos.";
-    private static final String INVALID_QUANTITY_EXCEPTION = "Error al preparar la venta: La cantidad de stock no puede ser menor a 0.";
+    /**
+     * Si la cantidad de stock vendido es menor a 1.
+     */
+    private static final String INVALID_QUANTITY_EXCEPTION = "Error al preparar la venta: La cantidad de stock no puede ser menor a 1.";
 
     /**
      * Durante la creación: El id no se usará, por lo tanto será 0.
@@ -23,11 +29,17 @@ public final record Sale(int id, Date date, int clientId, int productId, int qua
      */
     public static Sale createSaleFromArgs(String[] args) throws EjercicioException {
         try {
+            if (args.length < 5) {
+                throw new EjercicioException("%s\n%s".formatted(
+                        EjercicioException.illegalArguments(5),
+                        "Los argumentos a construir la venta son: [ID] [ID CLIENTE] [ID PRODUCTO] [CANTIDAD]"
+                ));
+            }
             int id = Integer.parseInt(args[1]);
             int clientId = Integer.parseInt(args[2]);
             int productId = Integer.parseInt(args[3]);
             int quantity = Integer.parseInt(args[4]);
-            if (quantity < 0) {
+            if (quantity < 1) {
                 throw new EjercicioException(INVALID_QUANTITY_EXCEPTION);
             }
             return new Sale(id, Date.valueOf(LocalDate.now()), clientId, productId, quantity);
