@@ -77,6 +77,7 @@ public final class ex2 {
             default ->
                 throw new EjercicioException(EjercicioException.INVALID_VALUE);
         }
+        System.out.println("Inserción de %s realizada con éxito.".formatted(sale.formatted()));
     }
 
     /**

@@ -1,14 +1,22 @@
 package Ejercicios;
 
 import Database.Database;
+import static Database.DatabaseExceptions.identifyErrorCode;
+import Database.DatabaseQueries;
 import static Ejercicios.ex2.validateArgument;
 import Models.EjercicioException;
 import Models.Sale;
 import java.sql.Connection;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.Types;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+/*
+    En vez de modificar el ejercicio 2, reharé el ejercicio 2 en este.
+    A mayores: No haré nada sobre SQLite en este ejercicio.
+ */
 /**
  * Crea un procedemento almacenado na base de datos ao que se lle pasen como
  * parámetros de entrada o identificador do produto e a cantidade dun produto
@@ -29,10 +37,6 @@ import java.util.logging.Logger;
  *
  * @author AaronFM
  */
-
-/*
-   En vez de modificar el ejercicio 2, reharé el ejercicio 2 en este.     
- */
 public class ex4 {
 
     /**
@@ -52,6 +56,7 @@ public class ex4 {
         } catch (SQLException ex) {
             throw new EjercicioException("%s: %s".formatted(ex.getErrorCode(), ex.getMessage()));
         }
+        System.out.println("Inserción de %s realizada con éxito.".formatted(sale.formatted()));
     }
 
     /**
@@ -65,22 +70,83 @@ public class ex4 {
      */
     private static void pickDatabaseAndInsertSale(int databaseNumber, Sale sale) throws EjercicioException, SQLException {
         Connection instance;
+        //Selección.
         switch (databaseNumber) {
             case 1 ->
                 instance = Database.getMySqlInstance();
-
-            case 2 ->
-                instance = Database.getSqliteInstance();
-
             default ->
                 throw new EjercicioException(EjercicioException.INVALID_VALUE);
         }
+        //Apertura, ejecución y cierre.
         try (instance) {
+            instance.setAutoCommit(false);
             insertSale(sale, instance);
+            instance.setAutoCommit(true);
         }
     }
 
-    private static void insertSale(Sale sale, Connection instance) {
-        //Comprobar stock mediante SELECT y no me complico.
+    /**
+     * Comprueba que existe el producto a vender y valida la cantidad vs stock
+     * actual.
+     *
+     * Si todo es correcto, inserta la venta.
+     *
+     * @param sale La venta.
+     * @param instance La entrada a la BD.
+     * @throws EjercicioException Si:
+     *
+     *
+     * @throws SQLException Si se produce algún error durante el intento de
+     * rollback o commit.
+     */
+    private static void insertSale(Sale sale, Connection instance) throws EjercicioException, SQLException {
+        //Comprobar si existe el producto.
+        try ( PreparedStatement productExistsQuery = instance.prepareStatement(DatabaseQueries.COUNT_PRODUCTS)) {
+            productExistsQuery.setInt(1, sale.productId());
+            try ( ResultSet productExists = productExistsQuery.executeQuery()) {
+                productExists.next();
+                if (productExists.getInt(1) == 0) {
+                    instance.rollback();
+                    throw new EjercicioException("El id de producto no existe en la base de datos.");
+                }
+            }
+        }
+        //Una vez pasado el primer fail, comprueba el stock.
+        int maxStock;
+        try ( CallableStatement callQuery = instance.prepareCall(DatabaseQueries.CALL_PRODUCTS_FUNCTION_GET_STOCK)) {
+            //Param 1: El valor de return.
+            callQuery.registerOutParameter(1, Types.INTEGER);
+            //Param 2: El id de producto.
+            callQuery.setInt(2, sale.productId());
+            callQuery.execute();
+            maxStock = callQuery.getInt(1);
+        }
+        //Si inválido, rollback y salida.
+        if (sale.quantity() > maxStock) {
+            instance.rollback();
+            throw new EjercicioException(
+                    "La cantidad en venta (%s) no puede superar el stock actual del producto (%s)."
+                            .formatted(sale.quantity(), maxStock)
+            );
+        }
+        //Si válido, registra venta. Podría haber reciclado parte del ejercicio 2, pero pa' qué.
+        try ( PreparedStatement prepareInsertion = instance.prepareStatement(DatabaseQueries.INSERT_SALE)) {
+            prepareInsertion.setInt(1, sale.id());
+            prepareInsertion.setDate(2, sale.date());
+            prepareInsertion.setInt(3, sale.clientId());
+            prepareInsertion.setInt(4, sale.productId());
+            prepareInsertion.setInt(5, sale.quantity());
+            prepareInsertion.executeUpdate();
+        } catch (SQLException sqlex) {
+            instance.rollback();
+            throw new EjercicioException(identifyErrorCode(sqlex));
+        }
+        //Finalmente, llama a procedimiento y realiza commit.
+        try ( CallableStatement procedureCall = instance.prepareCall(DatabaseQueries.CALL_PRODUCTS_PROCEDURE)) {
+            procedureCall.setInt(1, sale.productId());
+            procedureCall.setInt(2, sale.quantity());
+            procedureCall.executeUpdate();
+            instance.commit();
+        }
     }
 }

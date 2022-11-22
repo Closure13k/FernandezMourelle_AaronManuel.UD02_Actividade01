@@ -40,6 +40,14 @@ import java.sql.SQLException;
  */
 public class ex3 {
 
+    /**
+     * Llamada principal. Valida la entrada de datos e inicia el proceso de
+     * búsqueda.
+     *
+     * @param args Los datos a recibir por argumentos.
+     * @throws EjercicioException Si ocurre alguna incoherencia durante la
+     * validación o lectura de BD.
+     */
     public static void getClientInformation(String[] args) throws EjercicioException {
         int databaseNumber = validateArgumentsReceived(args);
         int clientId = validateClientId(args[1]);

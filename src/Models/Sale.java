@@ -47,4 +47,10 @@ public final record Sale(int id, Date date, int clientId, int productId, int qua
             throw new EjercicioException(ILLEGAL_VALUE_EXCEPTION);
         }
     }
+    /**
+     * toString personalizado para mostra información.
+     */
+    public String formatted(){
+        return "(ID: %s, Fecha: %s, ID Cliente: %s, ID Producto: %s, Cantidad: %s)".formatted(id, date, clientId, productId, quantity);
+    }
 }

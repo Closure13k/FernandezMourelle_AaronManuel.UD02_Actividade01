@@ -37,7 +37,7 @@ public final class Database {
     /**
      * Asigna la conexión a sqlite y la devuelve.
      *
-     * @return
+     * @return SQLite Connection
      * @throws SQLException
      */
     public static Connection getSqliteInstance() throws SQLException {
@@ -48,7 +48,7 @@ public final class Database {
     /**
      * Asigna la conexión a MySQL y la devuelve.
      *
-     * @return
+     * @return MySQL Connection
      * @throws SQLException
      */
     public static Connection getMySqlInstance() throws SQLException {

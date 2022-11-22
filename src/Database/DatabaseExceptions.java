@@ -2,6 +2,11 @@ package Database;
 
 import java.sql.SQLException;
 
+/**
+ * Formato de excepciones y constantes para SQLExceptions.
+ *
+ * @author AaronFM
+ */
 public interface DatabaseExceptions {
 
     /**
@@ -15,6 +20,7 @@ public interface DatabaseExceptions {
 
     /**
      * Identifica el código de error y asigna en consecuencia.
+     *
      * @param sqlex La excepción a reconocer.
      * @return El mensaje
      */
