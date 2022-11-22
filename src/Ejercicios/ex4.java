@@ -1,18 +1,18 @@
 package Ejercicios;
 
 import Database.Database;
-import static Database.DatabaseExceptions.identifyErrorCode;
 import Database.DatabaseQueries;
-import static Ejercicios.ex2.validateArgument;
 import Models.EjercicioException;
 import Models.Sale;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
-import java.sql.Types;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
+import static Database.DatabaseExceptions.identifyErrorCode;
+import static Ejercicios.ex2.validateArgument;
 /*
     En vez de modificar el ejercicio 2, reharé el ejercicio 2 en este.
     A mayores: No haré nada sobre SQLite en este ejercicio.
